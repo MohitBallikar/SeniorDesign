@@ -1,6 +1,13 @@
 import PySimpleGUI as sg
 ##screen selection button is broken
 
+rubies = None
+sapphires = None
+gold = None
+#may need to balance or intialize these
+rubies_str = str(rubies)
+sapphires_str = str(sapphires)
+gold_str = str(gold)
 
 # ----------- Create the 3 layouts this Window will display -----------
 layout1 = [[sg.Text('This is layout 1 - Turn Selection')],
@@ -9,7 +16,7 @@ layout1 = [[sg.Text('This is layout 1 - Turn Selection')],
 layout2 = [[sg.Text('This is layout 2 - Attack')],
            [sg.Button('Confirm')]]
 
-layout3 = [[sg.Text('This is layout 3: Growth - Choose a Resource')],
+layout3 = [[sg.Text('This is layout 3: Growth - Choose a Resource')],[sg.Text('Rubies: ' + rubies_str)],[sg.Text('Sapphire: ' + sapphires_str)],[sg.Text('Gold: ' + gold_str)],
            [sg.Button('Ruby'), sg.Button('Sapphire'), sg.Button('Emerald')]]
 
 layout4 = [[sg.Text('This is layout 4: Growth - Choose a card type to purchase')],
