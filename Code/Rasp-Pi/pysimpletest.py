@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
 ##screen selection button is broken
+##need a way to rescale the button text to button size, prob not viable
+##need to flip gui every 2 turns
 
 rubies = None
 sapphires = None
@@ -11,9 +13,9 @@ gold_str = str(gold)
 
 # ----------- Create the 3 layouts this Window will display -----------
 layout1 = [[sg.Text('This is layout 1 - Turn Selection')],
-           [sg.Button('Attack'), sg.Button('Growth')]]
+           [sg.Button('Attack', button_color= ('#ffffff', '#b51d09'), size=(50,2), font=('Helvetica', 12)), sg.Button('Growth', button_color=('#ffffff','#0b8a2b'), size=(50,2), font=('Helvetica', 12))]]
 
-layout2 = [[sg.Text('This is layout 2 - Attack')],
+layout2 = [[sg.Text('This is layout 2 - Attack', justification='center')],
            [sg.Button('Confirm')]]
 
 layout3 = [[sg.Text('This is layout 3: Growth - Choose a Resource')],[sg.Text('Rubies: ' + rubies_str)],[sg.Text('Sapphire: ' + sapphires_str)],[sg.Text('Gold: ' + gold_str)],
@@ -24,9 +26,9 @@ layout4 = [[sg.Text('This is layout 4: Growth - Choose a card type to purchase')
 
 # ----------- Create actual layout using Columns and a row of Buttons
 layout = [[sg.Column(layout1, key='-COL1-'), sg.Column(layout2, visible=False, key='-COL2-'), sg.Column(layout3, visible=False, key='-COL3-'), sg.Column(layout4, visible=False, key='-COL4-')],
-          [sg.Button('Next Screen'), sg.Button('Screen 1'), sg.Button('Screen 2'), sg.Button('Screen 3'), sg.Button('Screen 4'), sg.Button('Exit')]]
+          [sg.Button('Next Screen', size=(40,20)), sg.Button('Exit', size=(40,20), button_color='red')]]
 
-window = sg.Window('Swapping the contents of a window', layout)
+window = sg.Window('Swapping the contents of a window', layout, size=(800, 480), text_justification='center')
 
 layout = 1  # The currently visible layout
 while True:
@@ -43,3 +45,5 @@ while True:
         layout = int(event)
         window[f'-COL{layout}-'].update(visible=True)
 window.close()
+
+##def font_scale():
