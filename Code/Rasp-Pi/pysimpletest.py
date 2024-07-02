@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 ##screen selection button is broken
 ##need a way to rescale the button text to button size, prob not viable
-##need to flip gui every 2 turns
+##need to flip gui every 2 turns; must be done to 
 
 rubies = None
 sapphires = None
@@ -12,23 +12,31 @@ sapphires_str = str(sapphires)
 gold_str = str(gold)
 
 # ----------- Create the 3 layouts this Window will display -----------
-layout1 = [[sg.Text('This is layout 1 - Turn Selection')],
-           [sg.Button('Attack', button_color= ('#ffffff', '#b51d09'), size=(50,2), font=('Helvetica', 12)), sg.Button('Growth', button_color=('#ffffff','#0b8a2b'), size=(50,2), font=('Helvetica', 12))]]
+#show to Isaac
+layout1 = [[sg.Text('Turn Selection', font=('Helvetica', 32), size=(500,1), justification='center')],
+           [sg.Text('')],[sg.Text('')],[sg.Text('')],
+           [sg.Button('Attack', button_color= ('#ffffff', '#b51d09'), font=('Helvetica', 64)), sg.Text('\t\t\t'), sg.Button('Growth', button_color=('#ffffff','#0b8a2b'), font=('Helvetica', 64))],
+           [sg.Text('')], [sg.Text('')], [sg.Text('')],[sg.Text('')]]
 
-layout2 = [[sg.Text('This is layout 2 - Attack', justification='center')],
-           [sg.Button('Confirm')]]
+#work on these
+layout2 = [[sg.Text('Attack - Move your Desired Pieces', font=('Helvetica', 32), size=(500,1), justification='center')],
+           [sg.Text('')],[sg.Text('')],[sg.Text('')],
+           [sg.Text('\t\t\t\t\t'),sg.Button('Confirm', font=('Helvetica', 32))],
+           [sg.Text('')],
+           [sg.Text('')]]
 
 layout3 = [[sg.Text('This is layout 3: Growth - Choose a Resource')],[sg.Text('Rubies: ' + rubies_str)],[sg.Text('Sapphire: ' + sapphires_str)],[sg.Text('Gold: ' + gold_str)],
            [sg.Button('Ruby'), sg.Button('Sapphire'), sg.Button('Emerald')]]
 
 layout4 = [[sg.Text('This is layout 4: Growth - Choose a card type to purchase')],
-            [sg.Button('Attack'), sg.Button('Growth')]]
+            [sg.Button('Attack', font=('Helvetica', 64)), sg.Button('Growth', font=('Helvetica', 64))]]
 
 # ----------- Create actual layout using Columns and a row of Buttons
 layout = [[sg.Column(layout1, key='-COL1-'), sg.Column(layout2, visible=False, key='-COL2-'), sg.Column(layout3, visible=False, key='-COL3-'), sg.Column(layout4, visible=False, key='-COL4-')],
-          [sg.Button('Next Screen', size=(40,20)), sg.Button('Exit', size=(40,20), button_color='red')]]
+          [sg.Text('\t\t\t'), sg.Button('Next Screen', font=('Helvetica', 52))]]
 
-window = sg.Window('Swapping the contents of a window', layout, size=(800, 480), text_justification='center')
+
+window = sg.Window(' ', layout, size=(800, 480), text_justification='center')
 
 layout = 1  # The currently visible layout
 while True:
