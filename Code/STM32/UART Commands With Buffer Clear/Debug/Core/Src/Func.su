@@ -1,0 +1,3 @@
+../Core/Src/Func.c:15:6:interpreter	32	static
+../Core/Src/Func.c:47:6:decider	24	static
+../Core/Src/Func.c:55:6:ledsetter	24	static
