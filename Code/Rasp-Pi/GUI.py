@@ -17,12 +17,17 @@ gold_mine = Building("Gold Mine", {"Gold": 100, "Ruby": 50}, 100, increase_gold_
 def get_resources_str(player):
     return f"Rubies: {player.resources['Ruby'].amount}, Sapphires: {player.resources['Sapphire'].amount}, Gold: {player.resources['Gold'].amount}"
 
+def get_troops_str(player):
+    return player.show_troops()
+
 current_player = game_engine.get_current_player()
 resources_str = get_resources_str(current_player)
+troops_str = get_troops_str(current_player)
 
 # ----------- Create the 3 layouts this Window will display -----------
 layout1 = [
     [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text(troops_str, font=('Helvetica', 18), key='-TROOPS-')],
     [sg.Text('Turn Selection', font=('Helvetica', 32), size=(500, 1), justification='center')],
     [sg.Text('')],
     [sg.Text('')],
@@ -37,6 +42,7 @@ layout1 = [
 
 layout2 = [
     [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text(troops_str, font=('Helvetica', 18), key='-TROOPS-')],
     [sg.Text('Attack - Move your Desired Pieces', font=('Helvetica', 32), size=(500, 1), justification='center')],
     [sg.Text('')],
     [sg.Text('')],
@@ -49,6 +55,7 @@ layout2 = [
 
 layout3 = [
     [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text(troops_str, font=('Helvetica', 18), key='-TROOPS-')],
     [sg.Text('Growth - Choose a Resource', font=('Helvetica', 32), size=(500, 1), justification='center')],
     [sg.Text('')],
     [sg.Text('')],
@@ -62,6 +69,7 @@ layout3 = [
 
 layout4 = [
     [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text(troops_str, font=('Helvetica', 18), key='-TROOPS-')],
     [sg.Text('Growth - Choose a Building to Purchase', font=('Helvetica', 28), size=(500, 1), justification='center')],
     [sg.Text('')],
     [sg.Text('')],
