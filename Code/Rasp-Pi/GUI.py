@@ -1,52 +1,88 @@
 import PySimpleGUI as sg
-#from GameEngine import Engine
-##screen selection button is broken (dont need for final, but for testing can be nice)
+from GameEngine import Player, Building, Engine, Cavalry, Infantry, Wizard, Archer, NFCHandler, UARTReader, UARTParser
 
-rubies = None
-sapphires = None
-gold = None
-#may need to balance or intialize these
-rubies_str = str(rubies)
-sapphires_str = str(sapphires)
-gold_str = str(gold)
+# Initialize the game engine
+nfc_handler = NFCHandler()
+uart_readers = [UARTReader('/dev/ttyUSB0'), UARTReader('/dev/ttyUSB1'), UARTReader('/dev/ttyUSB2'), UARTReader('/dev/ttyUSB3')]
+uart_parser = UARTParser()
+game_engine = Engine(nfc_handler, uart_readers, uart_parser)
+
+# Initialize example buildings and troops
+def increase_gold_production(player):
+    player.resources["Gold"].amount += 10
+
+gold_mine = Building("Gold Mine", {"Gold": 100, "Ruby": 50}, 100, increase_gold_production)
+
+# Function to get the current player's resource string
+def get_resources_str(player):
+    return f"Rubies: {player.resources['Ruby'].amount}, Sapphires: {player.resources['Sapphire'].amount}, Gold: {player.resources['Gold'].amount}"
+
+current_player = game_engine.get_current_player()
+resources_str = get_resources_str(current_player)
 
 # ----------- Create the 3 layouts this Window will display -----------
-layout1 = [[sg.Text('Turn Selection', font=('Helvetica', 32), size=(500,1), justification='center')],
-           [sg.Text('')],[sg.Text('')],[sg.Text('')],
-           [sg.Button('Attack', button_color= ('#ffffff', '#b51d09'), font=('Helvetica', 60)), sg.Text('\t\t\t'), sg.Button('Growth', button_color=('#ffffff','#0b8a2b'), font=('Helvetica', 60))],
-           [sg.Text('')], [sg.Text('')], [sg.Text('')],[sg.Text('')]]
+layout1 = [
+    [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text('Turn Selection', font=('Helvetica', 32), size=(500, 1), justification='center')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Button('Attack', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 60)),
+     sg.Text('\t\t\t'), sg.Button('Growth', button_color=('#ffffff', '#0b8a2b'), font=('Helvetica', 60))],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+]
 
-#work on these
-layout2 = [[sg.Text('Attack - Move your Desired Pieces', font=('Helvetica', 32), size=(500,1), justification='center')],
-           [sg.Text('')],[sg.Text('')],[sg.Text('')],
-           [sg.Text('\t\t\t\t  '),sg.Button('Confirm', font=('Helvetica', 32))],
-           [sg.Text('')],
-           [sg.Text('')]]
+layout2 = [
+    [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text('Attack - Move your Desired Pieces', font=('Helvetica', 32), size=(500, 1), justification='center')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('\t\t\t\t  '), sg.Button('Confirm', font=('Helvetica', 32))],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+]
 
-layout3 = [[sg.Text('Growth - Choose a Resource', font=('Helvetica', 32), size=(500,1), justification='center')],
-           [sg.Text('\tRubies: ' + rubies_str + '\tSapphires: ' + sapphires_str + '\tGold: ' + gold_str, font=('Helvetica', 18))],
-           [sg.Text('')],
-           [sg.Text('')],
-           [sg.Text('\t'), sg.Button('Ruby', font=('Helvetica', 32)), sg.Text('\t'), sg.Button('Sapphire', font=('Helvetica', 32)), sg.Text('\t'), sg.Button('Gold', font=('Helvetica', 32))],
-           [sg.Text('')],
-           [sg.Text('')],
-           [sg.Text('')]]
+layout3 = [
+    [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text('Growth - Choose a Resource', font=('Helvetica', 32), size=(500, 1), justification='center')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('\t'), sg.Button('Ruby', font=('Helvetica', 32)), sg.Text('\t'), sg.Button('Sapphire', font=('Helvetica', 32)),
+     sg.Text('\t'), sg.Button('Gold', font=('Helvetica', 32))],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+]
 
-layout4 = [[sg.Text('Growth - Choose a Card Type to Purchase', font=('Helvetica', 28), size=(500,1), justification='center')],
-           [sg.Text('')],[sg.Text('')],[sg.Text('')],
-           [sg.Button('Attack', button_color= ('#ffffff', '#b51d09'), font=('Helvetica', 60)), sg.Text('\t\t\t'), sg.Button('Growth', button_color=('#ffffff','#0b8a2b'), font=('Helvetica', 60))],
-           [sg.Text('')], [sg.Text('')], [sg.Text('')],[sg.Text('')]]
+layout4 = [
+    [sg.Text('Current Resources: ' + resources_str, font=('Helvetica', 18), key='-RESOURCES-')],
+    [sg.Text('Growth - Choose a Building to Purchase', font=('Helvetica', 28), size=(500, 1), justification='center')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Button('Barracks', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 30)), sg.Button('Mine', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 40)), sg.Button('Armory', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 40)), sg.Button('Archer Range', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 40)), sg.Button('Mage Tower', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 40)), sg.Button('Stables', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 40)), sg.Button('Archer Towers', button_color=('#ffffff', '#b51d09'), font=('Helvetica', 40))],
+    [sg.Text('')],
+    [sg.Text('')],
+    [sg.Text('')],
+]
 
 # ----------- Create actual layout using Columns and a row of Buttons
-layout = [[sg.Column(layout1, key='-COL1-'), sg.Column(layout2, visible=False, key='-COL2-'), sg.Column(layout3, visible=False, key='-COL3-'), sg.Column(layout4, visible=False, key='-COL4-')],
-          [sg.Text('\t\t\t'), sg.Button('Next Screen', font=('Helvetica', 40))]]
-
+layout = [
+    [sg.Column(layout1, key='-COL1-'), sg.Column(layout2, visible=False, key='-COL2-'),
+     sg.Column(layout3, visible=False, key='-COL3-'), sg.Column(layout4, visible=False, key='-COL4-')],
+    [sg.Text('\t\t\t'), sg.Button('Next Screen', font=('Helvetica', 40))]
+]
 
 window = sg.Window(' ', layout, size=(800, 480), text_justification='center')
 
-#game_engine = GameEngine()
-
 layout = 1  # The currently visible layout
+
 while True:
     event, values = window.read()
     print(event, values)
@@ -61,10 +97,12 @@ while True:
         layout = int(event)
         window[f'-COL{layout}-'].update(visible=True)
     if event == 'Next Turn':
-        #call for next player turn to be switched to
-            #need to back this up in engine as well
         current_player = game_engine.next_turn()
-        window['-TURN-'].update(f'Player {current_player}')
-window.close()
+        resources_str = get_resources_str(current_player)
+        window['-RESOURCES-'].update('Current Resources: ' + resources_str)
+    if event == 'Gold Mine':
+        game_engine.handle_purchase_building(game_engine.get_current_player().name[-1], gold_mine)  # Assuming player names are 'Player 1', 'Player 2', etc.
+        resources_str = get_resources_str(game_engine.get_current_player())
+        window['-RESOURCES-'].update('Current Resources: ' + resources_str)
 
-##def font_scale():
+window.close()
