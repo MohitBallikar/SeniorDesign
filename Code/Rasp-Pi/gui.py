@@ -1,11 +1,12 @@
 import PySimpleGUI as sg
-#from game_engine import Engine
-from game_engine import Engine, Player, Building, Cavalry, Infantry, Wizard, Archer, UARTReader, UARTParser
+
+from game_engine import Engine
+from game_engine import Player, Building, Cavalry, Infantry, Wizard, Archer, UARTReader, UARTParser
 
 # Initialize the game engine
-uart_readers = [UARTReader('/dev/ttyUSB0')]
+uart_reader = [UARTReader('/dev/ttyUSB0')]
 uart_parser = UARTParser()
-game_engine = Engine(nfc_handler, uart_readers, uart_parser)
+game_engine = Engine(uart_reader, uart_parser, Player, Cavalry, Infantry, Wizard, Archer)
 
 # Initialize example buildings and troops
 def increase_gold_production(player):
@@ -91,7 +92,7 @@ window = sg.Window(' ', layout, size=(800, 480), text_justification='center')
 
 layout = 1  # The currently visible layout
 try:
-    game_engine = GameEngine()
+    game_engine = Engine()
 except Exception as e:
     sg.popup(f"Error Initializing Game Engine: (e)")
     raise
