@@ -1,9 +1,9 @@
 import PySimpleGUI as sg
-from GameEngine import Player, Building, Engine, Cavalry, Infantry, Wizard, Archer, NFCHandler, UARTReader, UARTParser
+#from game_engine import Engine
+from game_engine import Engine, Player, Building, Cavalry, Infantry, Wizard, Archer, UARTReader, UARTParser
 
 # Initialize the game engine
-nfc_handler = NFCHandler()
-uart_readers = [UARTReader('/dev/ttyUSB0'), UARTReader('/dev/ttyUSB1'), UARTReader('/dev/ttyUSB2'), UARTReader('/dev/ttyUSB3')]
+uart_readers = [UARTReader('/dev/ttyUSB0')]
 uart_parser = UARTParser()
 game_engine = Engine(nfc_handler, uart_readers, uart_parser)
 
@@ -90,6 +90,11 @@ layout = [
 window = sg.Window(' ', layout, size=(800, 480), text_justification='center')
 
 layout = 1  # The currently visible layout
+try:
+    game_engine = GameEngine()
+except Exception as e:
+    sg.popup(f"Error Initializing Game Engine: (e)")
+    raise
 
 while True:
     event, values = window.read()
@@ -112,5 +117,9 @@ while True:
         game_engine.handle_purchase_building(game_engine.get_current_player().name[-1], gold_mine)  # Assuming player names are 'Player 1', 'Player 2', etc.
         resources_str = get_resources_str(game_engine.get_current_player())
         window['-RESOURCES-'].update('Current Resources: ' + resources_str)
+    
+    if event == 'Read NFC':
+        tag_id = game_engine.read
+
 
 window.close()
