@@ -4,7 +4,6 @@ import serial
 
 from uart_reader import UARTReader
 from uart_parser import UARTParser
-from nfc_handler import NFCHandler
 
 #need gui expansion and connection
 
@@ -137,22 +136,23 @@ class Player:
 #def increase_health(player):
 #    player.health += 50  # Assuming Player class has a health attribute
 
-gold_mine = Building("Gold Mine", {"Gold": 100, "Ruby": 50}, 100, increase_gold_production) #increase the stated values
+#gold_mine = Building("Gold Mine", {"Gold": 100, "Ruby": 50}, 100, increase_gold_production) #increase the stated values
 
 
 class Engine:
-    
     normal_flip = "wlr-randr --output DSI-1 --transform normal"
     invert_flip = "wlr-randr --output DSI-1 --transform 180"
 
     #initialization
-    def __init__(self, nfc_handler, uart_reader, uart_parser):
+    def __init__(self, uart_reader, uart_parser):
         self.turn_counter = 1
-        self.players = [Player(f"Player {i + 1}") for i in range(4)]
-        self.nfc_handler = nfc_handler
+        self.players = self.initialize_players()
         self.uart_reader = uart_reader
         self.uart_parser = uart_parser
         self.setup_uart_handlers()
+        
+    def initialize_players(self):
+        return{i: f'Player {i+1}' for i in range(4)}
     
     def setup_uart_handlers(self):
         self.uart_parser.register_handler("ADD_RESOURCE", self.handle_add_resource)
@@ -176,7 +176,7 @@ class Engine:
         return current_player
     
     def get_current_player(self):
-        return self.players[(self.turn_counter - 1) % 4]
+        return self.players[(self.turn_counter - 1) % 4 + 1] #double-check here
     
     def add_resource_to_current_player(self, resource_type, amount):
         current_player = self.get_current_player()
@@ -201,10 +201,14 @@ class Engine:
     def show_all_troops(self):
         for player in self.players:
             print(player.show_troops())
-
-    def handle_nfc_pickup(self):
-        uid = self.nfc_handler.get_uid()
-        print(f"NFC UID: {uid}")
+    
+    def read_nfc(self):
+        NFC_GET_UID = "python3 example_get_uid.py"
+        result = subprocess.run(NFC_GET_UID, shell=True, capture_output=False, text=True)
+        if result.returncode == 0:
+            return result.stdout.strip() #parse and return the NFC Tag ID
+        else:
+            return None
 
     #double check this
     if(get_current_player == 1):
@@ -218,29 +222,30 @@ class Engine:
         if uart_string:
             self.uart_parser.parse_and_execute(uart_string)
 
-#passes the nfc-handler functionality to the Engine constructor 
-nfc_handler = NFCHandler()
+
 uart_readers = [
-UARTReader('/dev/ttyUSB0'),
-UARTReader('/dev/ttyUSB1'),
-UARTReader('/dev/ttyUSB2'),
-UARTReader('/dev/ttyUSB3')
+UARTReader('/dev/ttyUSB0')
+#UARTReader('/dev/ttyUSB1'),
+#UARTReader('/dev/ttyUSB2'),
+#UARTReader('/dev/ttyUSB3')
 ]
 uart_parser = UARTParser()
 #instantiation
-GameEngine = Engine(uart_readers, uart_parser, nfc_handler)
+game_engine = Engine(uart_readers, uart_parser) #nfc_handler)
 
 #gives resources to players through the game instance
 #example
-GameEngine.add_resource_to_current_player("Gold", 10)
-GameEngine.next_turn()
-GameEngine.add_resource_to_current_player("Ruby", 20)
-GameEngine.next_turn()
-GameEngine.add_resource_to_current_player("Sapphire", 30)
-GameEngine.next_turn()
+
+#need to pass first input in clearly here
+Engine.add_resource_to_current_player(current_player, "Gold", 10)#issue
+Engine.next_turn()
+Engine.add_resource_to_current_player("Ruby", 20)
+Engine.next_turn()
+Engine.add_resource_to_current_player("Sapphire", 30)
+Engine.next_turn()
 
 #shows resources for each player
-Engine.show_all_resources()
+#Engine.show_all_resources()
 
 # Example of purchasing a building
 current_player = players[0]
@@ -271,5 +276,5 @@ Engine.handle_nfc_pickup()
 #main loop of game behavior
 import time
 while True:
-    GameEngine.process_uart_input()
+    Engine.process_uart_input()
     time.sleep(.1) #buffers uart inputs by .1 sec
