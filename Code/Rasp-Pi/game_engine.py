@@ -79,6 +79,9 @@ class Player: #can just hardcode 4 players instead of listing them out as a list
         self.buildings = [] #list/array to hold player buildings
         self.troops = [] #list to hold player troops
 
+    def __repr__(self):
+        return f'Player {self.name}'
+
     def add_resource(self, resource_type, amount):
         if resource_type in self.resources:
             self.resources[resource_type].add(amount)
@@ -146,7 +149,8 @@ class Engine:
     #initialization
     def __init__(self, uart_reader, uart_parser):
         self.turn_counter = 1
-        self.players = self.initialize_players()
+        self.players = [Player(1), Player(2), Player(3), Player(4)]
+        self.turn_counter = 0
         self.uart_reader = uart_reader
         self.uart_parser = uart_parser
         self.setup_uart_handlers()
@@ -172,11 +176,11 @@ class Engine:
 
     def next_turn(self):
         self.turn_counter += 1
-        current_player = self.get_current_player()
-        return current_player
+        return self.get_current_player() 
     
     def get_current_player(self):
-        return self.players[(self.turn_counter - 1) % 4 + 1] #double-check here
+        current_index = self.turn_counter % len(self.players)
+        return self.players[current_index]
     
     def add_resource_to_current_player(self, resource_type, amount):
         current_player = self.get_current_player()
@@ -225,15 +229,12 @@ class Engine:
             self.uart_parser.parse_and_execute(uart_string)
 
 #raspi and linux system seem to only use /dev/ttyUSB0, so a prefix must be sent from the boards to define where the uart string is coming from
-uart_readers = [
+uart_reader = [
 UARTReader('/dev/ttyUSB0')
-#UARTReader('/dev/ttyUSB1'),
-#UARTReader('/dev/ttyUSB2'),
-#UARTReader('/dev/ttyUSB3')
 ]
 uart_parser = UARTParser() # the earlier readers will need to parse the PCB number as well here.
 #instantiation
-game_engine = Engine(uart_readers, uart_parser) #nfc_handler)
+game_engine = Engine(uart_reader, uart_parser) #nfc_handler)
 
 #gives resources to players through the game instance
 #example
@@ -251,7 +252,7 @@ Engine.next_turn()
 #Engine.show_all_resources()
 
 # Example of purchasing a building
-current_player = players[0]
+current_player = self.player[0]
 current_player.add_resource("Gold", 200)
 current_player.add_resource("Ruby", 100)
 current_player.purchase_building(gold_mine)
