@@ -68,7 +68,7 @@ class Archer(Troop):
     def __init__(self):
         super().__init__("Archer", movement_range=3, attack_range=4)
 
-class Player:
+class Player: #can just hardcode 4 players instead of listing them out as a list/dict
     def __init__(self, name):
         self.name = name
         self.resources = {
@@ -190,7 +190,7 @@ class Engine:
     #player 3's turn the variable has 3
     #player 4's turn the variable has 4
 
-    def handle_purchase_building(self, player_index, building):
+    def handle_purchase_building(self, player_index, building): #may need to change how this is handled in the hardcoded player situation
         player = self.players[int(player_index) - 1]
         player.purchase_building(building)
 
@@ -211,9 +211,11 @@ class Engine:
             return None
 
     #double check this
+    #on player one's turn the screen faces them and player two who is next to them
     if(get_current_player == 1):
         subprocess.run(normal_flip, shell=True, capture_output=False, text=True)
 
+    #on player three's turn the screen is now flipped to face them and player four. This is normalized back on player one's turn and vice-versa.
     if(get_current_player == 3):
         subprocess.run(invert_flip, shell=True, capture_output=False, text=True)
 
@@ -222,20 +224,21 @@ class Engine:
         if uart_string:
             self.uart_parser.parse_and_execute(uart_string)
 
-
+#raspi and linux system seem to only use /dev/ttyUSB0, so a prefix must be sent from the boards to define where the uart string is coming from
 uart_readers = [
 UARTReader('/dev/ttyUSB0')
 #UARTReader('/dev/ttyUSB1'),
 #UARTReader('/dev/ttyUSB2'),
 #UARTReader('/dev/ttyUSB3')
 ]
-uart_parser = UARTParser()
+uart_parser = UARTParser() # the earlier readers will need to parse the PCB number as well here.
 #instantiation
 game_engine = Engine(uart_readers, uart_parser) #nfc_handler)
 
 #gives resources to players through the game instance
 #example
 
+#could be a game_engine instantiation instead of Engine.xyz
 #need to pass first input in clearly here
 Engine.add_resource_to_current_player(current_player, "Gold", 10)#issue
 Engine.next_turn()
