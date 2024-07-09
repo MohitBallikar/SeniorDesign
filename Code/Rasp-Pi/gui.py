@@ -1,10 +1,12 @@
 import PySimpleGUI as sg
 
 from game_engine import Engine
-from game_engine import Player, Building, Cavalry, Infantry, Wizard, Archer, UARTReader, UARTParser
+from game_engine import Player, Building, Cavalry, Infantry, Wizard, Archer
 
+from uart_parser import UARTParser
+from uart_reader import UARTReader
 # Initialize the game engine
-uart_reader = [UARTReader('/dev/ttyUSB0')]
+uart_reader = UARTReader()
 uart_parser = UARTParser()
 game_engine = Engine(uart_reader, uart_parser, Player, Cavalry, Infantry, Wizard, Archer)
 
@@ -96,7 +98,7 @@ window = sg.Window(' ', layout, size=(800, 480), text_justification='center')
 
 layout = 1  # The currently visible layout
 try:
-    game_engine = Engine()
+    game_engine = Engine(uart_parser, uart_reader, Player, Building, Cavalry, Wizard, Archer)
 except Exception as e:
     sg.popup(f"Error Initializing Game Engine: (e)")
     raise
