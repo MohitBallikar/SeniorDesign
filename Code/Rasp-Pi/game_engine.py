@@ -1,6 +1,4 @@
 import subprocess
-import os
-import serial
 
 from uart_reader import UARTReader
 from uart_parser import UARTParser
@@ -30,6 +28,9 @@ class Ruby(Resource):
 class Sapphire(Resource):
     pass
 
+class Test():
+    pass
+
 class Building: #building class definition
     def __init__(self, name, cost, health, effect):
         self.name = name
@@ -44,7 +45,7 @@ class Building: #building class definition
         return f"{self.name}: Cost={self.cost}, Health={self.health}"
 
 class Troop: #general troop definition that will be defined for each type below
-    def __init__(self, name, movement_range, attack_range):
+    def __init__(self, name, movement_range, attack_range): #set as integers
         self.name = name
         self.movement_range = movement_range
         self.attack_range = attack_range
@@ -147,13 +148,17 @@ class Engine:
     invert_flip = "wlr-randr --output DSI-1 --transform 180"
 
     #initialization
-    def __init__(self, uart_reader, uart_parser):
+    def __init__(self, uart_reader, uart_parser, player_class, building_class, cavalry_class, infantry_class, wizard_class, archer_class):
         self.turn_counter = 1
-        self.players = [Player(1), Player(2), Player(3), Player(4)]
-        self.turn_counter = 0
-        self.uart_reader = UartReader()#capitalized for proper instantiation
-        self.uart_parser = UARTParser()#capitalized for proper instantiation
-        self.setup_uart_handlers()
+        self.players = [player_class(1), player_class(2), player_class(3), player_class(4)]
+        self.uart_reader = uart_reader#capitalized for proper instantiation
+        self.uart_parser = uart_parser#capitalized for proper instantiation
+        self.building_class = building_class
+        self.cavalry_class = cavalry_class
+        self.infantry_class = infantry_class
+        self.wizard_class = wizard_class
+        self.archer_class = archer_class
+         
         
     def initialize_players(self):
         return{i: f'Player {i+1}' for i in range(4)}
@@ -187,8 +192,8 @@ class Engine:
         current_player.add_resource(resource_type, amount)
 
     def show_all_resources(self):
-        for players in self.players:
-            print(player.show_resources()) 
+        for Player in self.players:
+            print(Player.show_resources()) 
     #player 1's turn the variable has 1
     #player 2's turn the variable has 2
     #player 3's turn the variable has 3
@@ -237,19 +242,18 @@ class Engine:
     def close_uart(self):
         self.uart_reader.close()
 #raspi and linux system seem to only use /dev/ttyUSB0, so a prefix must be sent from the boards to define where the uart string is coming from
-uart_reader = [
-UARTReader('/dev/ttyUSB0')
-]
+UARTReader.send_data(UARTReader, )#need to figure out the second argument
+uart_reader = UARTReader()
 uart_parser = UARTParser() # the earlier readers will need to parse the PCB number as well here.
 #instantiation
-game_engine = Engine(uart_reader, uart_parser) #nfc_handler)
+game_engine = Engine(uart_reader, uart_parser)
 
 #gives resources to players through the game instance
 #example
 
 #could be a game_engine instantiation instead of Engine.xyz
 #need to pass first input in clearly here
-Engine.add_resource_to_current_player(current_player, "Gold", 10)#issue
+Engine.add_resource_to_current_player("Gold", 10)#issue
 Engine.next_turn()
 Engine.add_resource_to_current_player("Ruby", 20)
 Engine.next_turn()
@@ -260,20 +264,20 @@ Engine.next_turn()
 #Engine.show_all_resources()
 
 # Example of purchasing a building
-current_player = self.player[0]
-current_player.add_resource("Gold", 200)
-current_player.add_resource("Ruby", 100)
-current_player.purchase_building(gold_mine)
-print(current_player.show_resources())
-print(current_player.show_buildings())
+#current_player = self.player[0]
+#current_player.add_resource("Gold", 200)
+#current_player.add_resource("Ruby", 100)
+#current_player.purchase_building(gold_mine)
+#print(current_player.show_resources())
+#print(current_player.show_buildings())
 
 # Recruit troops for the current player
-current_player = Engine.get_current_player()
-current_player.add_resource("Gold", 500)
-current_player.recruit_troop("Cavalry")
-current_player.recruit_troop("Archer")
-print(current_player.show_resources())
-print(current_player.show_troops())
+#current_player = Engine.get_current_player()
+#current_player.add_resource("Gold", 500)
+#current_player.recruit_troop("Cavalry")
+#current_player.recruit_troop("Archer")
+#print(current_player.show_resources())
+#print(current_player.show_troops())
 
 # Move to the next turn
 Engine.next_turn()
