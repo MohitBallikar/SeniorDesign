@@ -54,19 +54,19 @@ class Troop: #general troop definition that will be defined for each type below
 
 class Cavalry(Troop):
     def __init__(self):
-        super().__init__("Cavalry", movement_range=5, attack_range=2)
+        super().__init__("Cavalry", movement_range=3, attack_range=1)
 
 class Infantry(Troop):
     def __init__(self):
-        super().__init__("Infantry", movement_range=3, attack_range=1)
+        super().__init__("Infantry", movement_range=1, attack_range=1)
 
 class Wizard(Troop):
     def __init__(self):
-        super().__init__("Wizard", movement_range=2, attack_range=3)
+        super().__init__("Wizard", movement_range=1, attack_range=2)
 
 class Archer(Troop):
     def __init__(self):
-        super().__init__("Archer", movement_range=3, attack_range=4)
+        super().__init__("Archer", movement_range=1, attack_range=2)
 
 class Player: #can just hardcode 4 players instead of listing them out as a list/dict
     def __init__(self, name):
@@ -151,8 +151,8 @@ class Engine:
         self.turn_counter = 1
         self.players = [Player(1), Player(2), Player(3), Player(4)]
         self.turn_counter = 0
-        self.uart_reader = uart_reader
-        self.uart_parser = uart_parser
+        self.uart_reader = UartReader()#capitalized for proper instantiation
+        self.uart_parser = UARTParser()#capitalized for proper instantiation
         self.setup_uart_handlers()
         
     def initialize_players(self):
@@ -223,11 +223,19 @@ class Engine:
     if(get_current_player == 3):
         subprocess.run(invert_flip, shell=True, capture_output=False, text=True)
 
+    def send_uart_command(self, command):
+        response = self.uart_reader.send_data(command)
+        if response == b'Acknowledged':
+            return True
+        return False
+    
     def process_uart_input(self):
         uart_string = self.uart_reader.read_line()
         if uart_string:
             self.uart_parser.parse_and_execute(uart_string)
-
+    
+    def close_uart(self):
+        self.uart_reader.close()
 #raspi and linux system seem to only use /dev/ttyUSB0, so a prefix must be sent from the boards to define where the uart string is coming from
 uart_reader = [
 UARTReader('/dev/ttyUSB0')
