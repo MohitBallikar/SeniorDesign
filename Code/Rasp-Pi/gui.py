@@ -39,6 +39,7 @@ layout1 = [
     [sg.Text('')],
     [sg.Text('')],
     [sg.Text('')],
+    [sg.Text("Player's Turn:"), sg.Text(key='-TURN-')]
 ]
 
 layout2 = [
@@ -52,6 +53,7 @@ layout2 = [
     [sg.Text('')],
     [sg.Text('')],
     [sg.Text('')],
+    [sg.Text("Player's Turn:"), sg.Text(key='-TURN-')]
 ]
 
 layout3 = [
@@ -66,6 +68,7 @@ layout3 = [
     [sg.Text('')],
     [sg.Text('')],
     [sg.Text('')],
+    [sg.Text("Player's Turn:"), sg.Text(key='-TURN-')]
 ]
 
 layout4 = [
@@ -79,6 +82,7 @@ layout4 = [
     [sg.Text('')],
     [sg.Text('')],
     [sg.Text('')],
+    [sg.Text("Player's Turn:"), sg.Text(key='-TURN-')]
 ]
 
 # ----------- Create actual layout using Columns and a row of Buttons
@@ -114,6 +118,7 @@ while True:
         current_player = game_engine.next_turn()
         resources_str = get_resources_str(current_player)
         window['-RESOURCES-'].update('Current Resources: ' + resources_str)
+        window['-TURN-'].update(f'{current_player}')
     if event == 'Gold Mine':
         game_engine.handle_purchase_building(game_engine.get_current_player().name[-1], gold_mine)  # Assuming player names are 'Player 1', 'Player 2', etc.
         resources_str = get_resources_str(game_engine.get_current_player())
