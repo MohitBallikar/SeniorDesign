@@ -2,7 +2,8 @@ import subprocess
 
 from uart_reader import UARTReader
 from uart_parser import UARTParser
-
+from movement import Board
+board = Board()
 #need gui expansion and connection
 
 #need card purchasing and RFID parsing (just bouncing off of the UART parsing/reading)
@@ -32,17 +33,30 @@ class Test():
     pass
 
 class Building: #building class definition
-    def __init__(self, name, cost, health, effect):
+    def __init__(self, name, g_cost, s_cost, r_cost, health):
         self.name = name
-        self.cost = cost  # cost is a dictionary of resources required
+        self.g_cost = g_cost  # cost is a dictionary of resources required
+        self.s_cost = s_cost
+        self.r_cost = r_cost
         self.health = health
-        self.effect = effect  # effect is a function that applies the building's benefits to the player
+        #self.effect = effect  # effect is a function that applies the building's benefits to the player
 
     def apply_effect(self, player):
         self.effect(player)
 
     def __str__(self):
         return f"{self.name}: Cost={self.cost}, Health={self.health}"
+
+#defined buildings, the values are Name, Gold Cost, Sapphire Cost, Health
+archer_range = Building("Archer Range", 3, 0, 0, 20)
+archer_tower = Building("Archer Tower", 3, 0, 0, 15)
+armory = Building("Armory", 2, 0, 0, 20)
+barracks = Building("Barracks", 1, 0, 0, 25)
+castle = Building("Castle", 0, 0, 0, 35)
+mage_tower = Building("Mage Tower", 0, 2, 2, 25)
+mine = Building("Mine", 1, 1, 1, 25)
+stables = Building("Stables", 1, 2, 0, 20)
+
 
 class Troop: #general troop definition that will be defined for each type below
     def __init__(self, name, movement_range, attack_range): #set as integers
@@ -53,32 +67,24 @@ class Troop: #general troop definition that will be defined for each type below
     def __str__(self):
         return f"{self.name} (Move: {self.movement_range}, Attack: {self.attack_range})"
 
-class Cavalry(Troop):
-    def __init__(self):
-        super().__init__("Cavalry", movement_range=3, attack_range=1)
-
-class Infantry(Troop):
-    def __init__(self):
-        super().__init__("Infantry", movement_range=1, attack_range=1)
-
-class Wizard(Troop):
-    def __init__(self):
-        super().__init__("Wizard", movement_range=1, attack_range=2)
-
-class Archer(Troop):
-    def __init__(self):
-        super().__init__("Archer", movement_range=1, attack_range=2)
+# intialize troops: Name, movement range, attack range
+archer = Troop("Archer", 1, 2)
+cavalry = Troop("Cavalry", 3, 1)
+infantry = Troop("Infantry", 1, 1)
+wizard = Troop("Wizard", 1, 2)
 
 class Player: #can just hardcode 4 players instead of listing them out as a list/dict
-    def __init__(self, name):
+    def __init__(self, name, gold, ruby, sapphire, buildings, troops):
         self.name = name
-        self.resources = {
-            "Gold": Gold(),
-            "Ruby": Ruby(),
-            "Sapphire": Sapphire()
-        }
-        self.buildings = [] #list/array to hold player buildings
-        self.troops = [] #list to hold player troops
+        self.gold = int(gold)
+        self.ruby = int(ruby)
+        self.sapphire = int(sapphire)
+        
+        #will need to get this goated and working; or just use a id/number scheme
+            #like 1111 1111 for the buildings or 1111 for the troops
+                # 1000 would mean that just infantry or 0001 would be just wizard 
+        self.buildings = buildings[""] #list/array to hold player buildings
+        self.troops = troops[""] #list to hold player troops
 
     def __repr__(self):
         return f'Player {self.name}'
@@ -279,18 +285,24 @@ Engine.next_turn()
 #print(current_player.show_resources())
 #print(current_player.show_troops())
 
-# Move to the next turn
+# Move to the next turn; example will need to comment
 Engine.next_turn()
 current_player = Engine.get_current_player()
 current_player.recruit_troop("Wizard")
 print(current_player.show_resources())
 print(current_player.show_troops())
 
-#handles NFC pickup (scanning)
-Engine.handle_nfc_pickup()
+
 
 #main loop of game behavior
 import time
 while True:
     Engine.process_uart_input()
+    
+    
+    
+    
+    if(current_player.recruit_troop()): #when a piece is recruited/purchased for the first time, it needs to be placed on the home tiles (tiles: 0,0 / 0,1 / 0,2 /  0,3 /  0,4  )
+        board.place_piece(current_player, piece_type="wizard", mcu_id=1, sensor_id=0 )
+    
     time.sleep(.1) #buffers uart inputs by .1 sec
