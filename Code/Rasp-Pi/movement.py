@@ -4,14 +4,14 @@ class Board:
     def __init__(self):
         self.grids = {mcu_id: [['' for _ in range(5)] for _ in range(3)] for mcu_id in range(4)}
 
-    def place_piece(self, player_id, piece_type, mcu_id, sensor_id):
+    def place_piece(self, player_id, piece_type, mcu_id, sensor_id, num_troops):
         print(f"Place piece started.")
 
         row = (sensor_id-1) // 5
         col = (sensor_id-1) % 5
             
-        self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}"
-        print(f"Placed {piece_type} of Player {player_id} at sensor {sensor_id + 1} on MCU {mcu_id}.")
+        self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}_{num_troops}"
+        print(f"Placed {piece_type} of Player {player_id} with {num_troops} troops at sensor {sensor_id + 1} on MCU {mcu_id}.")
         return True
 
     def move_piece(self, player_id, mcu_id, from_sensor_id, to_sensor_id):
@@ -50,21 +50,38 @@ class Board:
         print(f"Moved {piece} from sensor {from_sensor_id} to sensor {to_sensor_id} on MCU {mcu_id}.")
         return True
     
+    def update_piece(self, player_id, piece_type, mcu_id, sensor_id, new_num_troops):
+        print("Update piece started.")
+        row = (sensor_id - 1) // 5
+        col = (sensor_id - 1) % 5
+        
+        existing_piece = self.grids[mcu_id][row][col]
+        if existing_piece == '':
+            print("No piece to update at the specified location.")
+            return False
+        
+        existing_player_id, existing_piece_type, _ = existing_piece.split('_')
+        if int(existing_player_id) != player_id or existing_piece_type != piece_type:
+            print("Piece type or player ID mismatch.")
+            return False
+        
+        self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}_{new_num_troops}"
+        print(f"Updated {piece_type} of Player {player_id} to {new_num_troops} troops at sensor {sensor_id} on MCU {mcu_id}.")
+        return True
+    
     @staticmethod
     def get_valid_moves(piece, row, col, grid):
         piece_type = piece.split('_')[1]
         valid_moves = set()
 
         if piece_type == 'Infantry':
-            moves = [(row + i, col) for i in range(-2, 3) if 0 <= row + i < 3 and (i != 0)] + \
-                    [(row, col + i) for i in range(-2, 3) if 0 <= col + i < 5 and (i != 0)] + \
-                    [(row + i, col + j) for i in range(-1, 2) for j in range(-1, 2) if 0 <= row + i < 3 and 0 <= col + j < 5 and (i != 0 or j != 0)]
+            moves = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5]
             
         elif piece_type == 'Archer':
-            moves = [(row + i, col + j) for i in range(-3, 4) for j in range(-3, 4) if abs(i) + abs(j) <= 3 if 0 <= row + i < 3 and 0 <= col + j < 5 and (i != 0 or j != 0)]
+            moves = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5]
             
-        elif piece_type == 'Cavalry':
-            moves = [(r, c) for r in range(3) for c in range(5)]
+        elif piece_type == 'Cavalry':  # Maybe change to remove diagonals
+            moves = [(row + i, col + j) for i in range(-3, 4) for j in range(-3, 4) if abs(i) + abs(j) <= 3 if 0 <= row + i < 3 and 0 <= col + j < 5 and (i != 0 or j != 0)]
 
         elif piece_type == 'Wizard':
                 moves = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5]
