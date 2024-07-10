@@ -1,7 +1,5 @@
 # combat.py
 
-from movement import Board
-
 def calculate_attack_range(board, player_id, mcu_id):
     attackable_positions = []
     attack_ranges = []
