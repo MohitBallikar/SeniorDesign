@@ -8,29 +8,6 @@ board = Board()
 
 #need card purchasing and RFID parsing (just bouncing off of the UART parsing/reading)
 
-#need combat mechanic
-
-class Resource:
-    def __init__(self, amount=0):
-        self.amount = amount
-    
-    def add(self, amount):
-        self.amount += amount
-    
-    def __str__(self):
-        return f"{self.__class__.__name__}: {self.amount}"
-
-class Gold(Resource):
-    pass
-
-class Ruby(Resource):
-    pass
-
-class Sapphire(Resource):
-    pass
-
-class Test():
-    pass
 
 class Building: #building class definition
     def __init__(self, name, g_cost, s_cost, r_cost, health):
@@ -47,9 +24,10 @@ class Building: #building class definition
     def __str__(self):
         return f"{self.name}: Cost={self.cost}, Health={self.health}"
 
+
 #defined buildings, the values are Name, Gold Cost, Sapphire Cost, Health
 archer_range = Building("Archer Range", 3, 0, 0, 20)
-archer_tower = Building("Archer Tower", 3, 0, 0, 15)
+archer_tower = Building("Archer Tower", 3, 0, 0, 15) # will act to debuff or lower the troop count
 armory = Building("Armory", 2, 0, 0, 20)
 barracks = Building("Barracks", 1, 0, 0, 25)
 castle = Building("Castle", 0, 0, 0, 35)
@@ -89,15 +67,17 @@ class Player: #can just hardcode 4 players instead of listing them out as a list
     def __repr__(self):
         return f'Player {self.name}'
 
-    def add_resource(self, resource_type, amount):
-        if resource_type in self.resources:
-            self.resources[resource_type].add(amount)
-        else:
-            print(f"Resource type {resource_type} not recognized")
+    def add_gold(self, amount):
+        self.gold += amount
+    
+    def add_ruby(self, amount):
+        self.ruby += amount 
+    
+    def add_sapphire(self, amount):
+        self.sapphire += amount
     
     def show_resources(self):
-        resources_str = ', '.join([str(resource) for resource in self.resources.values()])
-        return f"{self.name}: {resources_str}"
+        return(self.gold, self.ruby, self.sapphire)
 
     def can_afford(self, building):
         for resource, cost in building.cost.items():
@@ -121,23 +101,8 @@ class Player: #can just hardcode 4 players instead of listing them out as a list
     def show_buildings(self):
         return f"{self.name}'s buildings: " + ', '.join([str(building) for building in self.buildings])
 
-    def recruit_troop(self, troop_type):
-        troop = None
-        if troop_type.lower() == "cavalry":
-            troop = Cavalry()
-        elif troop_type.lower() == "infantry":
-            troop = Infantry()
-        elif troop_type.lower() == "wizard":
-            troop = Wizard()
-        elif troop_type.lower() == "archer":
-            troop = Archer()
-        
-        if troop:
-            self.troops.append(troop)
-            print(f"{self.name} recruited {troop.name}")
-    
-    def show_troops(self):
-        return f"{self.name}'s troops: " + ', '.join([str(troop) for troop in self.troops]) 
+
+
 
 ### Example effect functions
 #def increase_gold_production(player):
@@ -297,12 +262,7 @@ print(current_player.show_troops())
 #main loop of game behavior
 import time
 while True:
+    
     Engine.process_uart_input()
-    
-    
-    
-    
-    if(current_player.recruit_troop()): #when a piece is recruited/purchased for the first time, it needs to be placed on the home tiles (tiles: 0,0 / 0,1 / 0,2 /  0,3 /  0,4  )
-        board.place_piece(current_player, piece_type="wizard", mcu_id=1, sensor_id=0 )
-    
+        
     time.sleep(.1) #buffers uart inputs by .1 sec
