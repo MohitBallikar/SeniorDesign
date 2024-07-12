@@ -18,7 +18,7 @@ class Board:
         col = (sensor_id-1) % 5
 
         if not self.is_base_space(player_id, mcu_id, col):
-            print("Invalid placement. Pieces can only start in the special spaces.")
+            print("Invalid placement. Pieces can only start in the base spaces.")
             return False
             
         self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}_{num_troops}"
@@ -108,6 +108,17 @@ class Board:
                     if self.grids[mcu_id][row][0].startswith(f"{(player_id % 4) + 1}_"):
                         enemy_detected.append((mcu_id, row, 0))
         return enemy_detected
+    
+    def tower_defense(self, player_id):
+        enemies = self.detect_enemy_on_base_space(player_id)
+        for mcu_id, row, col in enemies:
+            piece = self.grids[mcu_id][row][col]
+            if piece:
+                piece_player_id, piece_type, troops = piece.split('_')
+                troops = int(troops)
+                new_troops = max(0, troops - 2)
+                self.grids[mcu_id][row][col] = f"{piece_player_id}_{piece_type}_{new_troops}"
+                print(f"Enemy's {piece} has been attacked by Archer Tower. New unit strength: {new_troops}")
     
     #Helper function to grab movement ranges
     @staticmethod
