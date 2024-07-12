@@ -1,5 +1,6 @@
 # combat.py
 
+#Targeting list function, returns array with 
 def calculate_attack_range(board, player_id, mcu_id):
     attackable_positions = []
     attack_ranges = []
@@ -11,30 +12,25 @@ def calculate_attack_range(board, player_id, mcu_id):
                 attacker_info = (piece, targets)
                 attack_ranges.append(attacker_info)
     return attack_ranges
-    return attackable_positions
 
-
+#Helper function, projects attack positions for each of a players' pieces
 def get_attackable_positions(piece, row, col, grid):
     piece_type = piece.split('_')[1]
     attackable_positions = []
 
-    if piece_type == 'Infantry':
-        targets = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
+    if piece_type == 'Infantry' or piece_type == 'Cavalry':
+        targets = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5]
     elif piece_type == 'Archer' or piece_type == 'Wizard':
-        targets = [(row + i, col) for i in range(-2, 3) if 0 <= row + i < 3 and (i != 0)] + \
-                  [(row, col + i) for i in range(-2, 3) if 0 <= col + i < 5 and (i != 0)] + \
-                  [(row + i, col + j) for i in range(-1, 2) for j in range(-1, 2) if 0 <= row + i < 3 and 0 <= col + j < 5 and (i != 0 or j != 0)]
-        
-    elif piece_type == 'Cavalry':
-        targets = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
-    
+        targets = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5] + \
+                  [(row + i, col + j) for i, j in [(-2, 0), (2, 0), (0, -2), (0, 2)] if 0 <= row + i < 3 and 0 <= col + j < 5]
+                  
     for r, c in targets:
         if 0 <= r < 3 and 0 <= c < 5:
             attackable_positions.append((r, c, grid[r][c]))
     
     return attackable_positions
 
-
+#Helper function, contains attack ratio lookup table
 def attack_ratio(attacker, defender):
     combat_table = {
         'Infantry': {'Infantry': 1, 'Archer': 1.5, 'Cavalry': 1, 'Wizard': 1},
@@ -46,9 +42,7 @@ def attack_ratio(attacker, defender):
         return 'Instant kill'
     return combat_table[attacker][defender]
 
-
-# Below functions are untested but looked over logically
-
+#Helper function for attack sequence
 def perform_attack(board, mcu_id, attacker_piece, defender_piece):
     attacker_data = attacker_piece.split('_')
     defender_data = defender_piece.split('_')
@@ -70,7 +64,8 @@ def perform_attack(board, mcu_id, attacker_piece, defender_piece):
     defender_data[2] = str(defender_troops)
     return '_'.join(defender_data)
 
-def update_board_after_attack(board, mcu_id, attacker_pos, defender_pos):
+#Attack sequence, call after grabbing gui input from target selection screen
+def attack_sequence(board, mcu_id, attacker_pos, defender_pos):
     attacker_piece = board.grids[mcu_id][attacker_pos[0]][attacker_pos[1]]
     defender_piece = board.grids[mcu_id][defender_pos[0]][defender_pos[1]]
 

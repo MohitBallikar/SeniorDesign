@@ -3,17 +3,37 @@
 class Board:
     def __init__(self):
         self.grids = {mcu_id: [['' for _ in range(5)] for _ in range(3)] for mcu_id in range(4)}
+        self.base_spaces = {
+            0: {'first': 1, 'last': 2},
+            1: {'first': 2, 'last': 3},
+            2: {'first': 3, 'last': 4},
+            3: {'first': 4, 'last': 1}
+        }
 
+    #Function for initial piece spawning
     def place_piece(self, player_id, piece_type, mcu_id, sensor_id, num_troops):
         print(f"Place piece started.")
 
         row = (sensor_id-1) // 5
         col = (sensor_id-1) % 5
+
+        if not self.is_base_space(player_id, mcu_id, col):
+            print("Invalid placement. Pieces can only start in the special spaces.")
+            return False
             
         self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}_{num_troops}"
-        print(f"Placed {piece_type} of Player {player_id} with {num_troops} troops at sensor {sensor_id + 1} on MCU {mcu_id}.")
+        print(f"Placed {piece_type} of Player {player_id} with {num_troops} troops at sensor {sensor_id} on MCU {mcu_id}.")
         return True
+    
+    #Helper function to determine valid spawn locations
+    def is_base_space(self, player_id, mcu_id, col):
+        if player_id == self.base_spaces[mcu_id]['first'] and col == 0:
+            return True
+        elif player_id == self.base_spaces[mcu_id]['last'] and col == 4:
+            return True
+        return False
 
+    #Function to be called during movement phase, uses checkers rules of double tapping sensor, then movement. Re-call if invalid after prompting user through gui
     def move_piece(self, player_id, mcu_id, from_sensor_id, to_sensor_id):
         print(f"Move piece started.")
 
@@ -22,6 +42,13 @@ class Board:
         to_row = (to_sensor_id-1) // 5
         to_col = (to_sensor_id-1) % 5
 
+        piece = self.grids[mcu_id][from_row][from_col]
+        piece_player_id = int(piece.split('_')[0])
+
+        if piece_player_id != player_id:
+            print("You can't move other peoples' pieces")
+            return False
+            
         if self.grids[mcu_id][from_row][from_col] == '':
             print("Your piece isnt at the start.")
             return False
@@ -37,7 +64,6 @@ class Board:
             return False
             #raise Exception("You cant move there.")
 
-        piece = self.grids[mcu_id][from_row][from_col]
         valid_moves = self.get_valid_moves(piece, from_row, from_col, self.grids[mcu_id])
 
         if (to_row, to_col) not in valid_moves:
@@ -50,6 +76,7 @@ class Board:
         print(f"Moved {piece} from sensor {from_sensor_id} to sensor {to_sensor_id} on MCU {mcu_id}.")
         return True
     
+    #Updates piece (adds troops)
     def update_piece(self, player_id, piece_type, mcu_id, sensor_id, new_num_troops):
         print("Update piece started.")
         row = (sensor_id - 1) // 5
@@ -69,6 +96,20 @@ class Board:
         print(f"Updated {piece_type} of Player {player_id} to {new_num_troops} troops at sensor {sensor_id} on MCU {mcu_id}.")
         return True
     
+    #Detects enemy piece on ally turf, to be used for building combat
+    def detect_enemy_on_base_space(self, player_id):
+        enemy_detected = []
+        for mcu_id in range(4):
+            for row in range(3):
+                if player_id == self.base_spaces[mcu_id]['first']:
+                    if self.grids[mcu_id][row][4].startswith(f"{(player_id % 4) + 1}_"):
+                        enemy_detected.append((mcu_id, row, 4))
+                elif player_id == self.base_spaces[mcu_id]['last']:
+                    if self.grids[mcu_id][row][0].startswith(f"{(player_id % 4) + 1}_"):
+                        enemy_detected.append((mcu_id, row, 0))
+        return enemy_detected
+    
+    #Helper function to grab movement ranges
     @staticmethod
     def get_valid_moves(piece, row, col, grid):
         piece_type = piece.split('_')[1]
@@ -81,7 +122,9 @@ class Board:
             moves = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5]
             
         elif piece_type == 'Cavalry':  # Maybe change to remove diagonals
-            moves = [(row + i, col + j) for i in range(-3, 4) for j in range(-3, 4) if abs(i) + abs(j) <= 3 if 0 <= row + i < 3 and 0 <= col + j < 5 and (i != 0 or j != 0)]
+            moves = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5] +\
+                    [(row + i, col + j) for i, j in [(-2, 0), (2, 0), (0, -2), (0, 2)] if 0 <= row + i < 3 and 0 <= col + j < 5] +\
+                    [(row + i, col + j) for i, j in [(-3, 0), (3, 0), (0, -3), (0, 3)] if 0 <= row + i < 3 and 0 <= col + j < 5]
 
         elif piece_type == 'Wizard':
                 moves = [(row + i, col + j) for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)] if 0 <= row + i < 3 and 0 <= col + j < 5]
