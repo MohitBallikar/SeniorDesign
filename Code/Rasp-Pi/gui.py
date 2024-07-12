@@ -1,7 +1,8 @@
 import PySimpleGUI as sg
 
+from player import Player
+from building import Building
 from game_engine import Engine
-from game_engine import Player, Building, Cavalry, Infantry, Wizard, Archer
 
 from uart_parser import UARTParser
 from uart_reader import UARTReader
