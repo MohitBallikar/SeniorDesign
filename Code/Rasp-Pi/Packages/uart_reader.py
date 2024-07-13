@@ -18,3 +18,38 @@ class UARTReader:
     def close(self):
         self.port.close()
     
+class MultiUARTReader:
+    def __init__(self, baudrate=115200, timeout=1.5):
+        self.readers = []
+        for i in range(4):
+            port = f"/dev/ttyUSB{i}"
+            try:
+                self.readers.append(UARTReader(port, baudrate, timeout))
+            except serial.SerialException:
+                print(f"Error: Could not open {port}")
+
+    def send_data_to_all(self, data):
+        responses = {}
+        for i, reader in enumerate(self.readers):
+            responses[f"USB{i}"] = reader.send_data(data)
+        return responses
+
+    def send_data_to_port(self, port_number, data):
+        if 0 <= port_number < len(self.readers):
+            return self.readers[port_number].send_data(data)
+        else:
+            raise ValueError("Invalid port number. Must be between 0 and 3.")
+
+    def close_all(self):
+        for reader in self.readers:
+            reader.close()
+
+# Example usage
+multi_uart_reader = MultiUARTReader()
+response_all = multi_uart_reader.send_data_to_all("SETLED 4 G")
+print(response_all)
+
+response_single = multi_uart_reader.send_data_to_port(1, "SETLED 4 R")
+print(response_single)
+
+multi_uart_reader.close_all()
