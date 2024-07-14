@@ -17,8 +17,27 @@ class Board:
         row = (sensor_id-1) // 5
         col = (sensor_id-1) % 5
 
+        if self.grids[mcu_id][row][col] != '':
+            print("Occupied.")
+            return False
+
         if not self.is_base_space(player_id, mcu_id, col):
             print("Invalid placement. Pieces can only start in the base spaces.")
+            return False
+            
+        self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}_{num_troops}"
+        print(f"Placed {piece_type} of Player {player_id} with {num_troops} troops at sensor {sensor_id} on MCU {mcu_id}.")
+        return True
+    
+    #Function for spawning pieces anywhere, useful for midstate board initialization
+    def place_piece_anywhere(self, player_id, piece_type, mcu_id, sensor_id, num_troops):
+        print(f"Place piece started.")
+
+        row = (sensor_id-1) // 5
+        col = (sensor_id-1) % 5
+
+        if self.grids[mcu_id][row][col] != '':
+            print("Occupied.")
             return False
             
         self.grids[mcu_id][row][col] = f"{player_id}_{piece_type}_{num_troops}"
@@ -32,6 +51,26 @@ class Board:
         elif player_id == self.base_spaces[mcu_id]['last'] and col == 4:
             return True
         return False
+    
+    def find_piece_location(self, player_id, piece_type):
+        for mcu_id, grid in self.grids.items():
+            for row in range(3):
+                for col in range(5):
+                    piece = grid[row][col]
+                    if piece:
+                        piece_player_id, piece_type_in_grid, _ = piece.split('_')
+                        if int(piece_player_id) == player_id and piece_type_in_grid == piece_type:
+                            sensor_id = self.convert_to_sensor_id(row, col)
+                            return mcu_id, sensor_id, row, col
+        return None
+
+    def convert_to_sensor_id(self, row, col):
+        sensor_mapping = [
+            [3, 4, 9, 10, 15],
+            [2, 5, 8, 11, 14],
+            [1, 6, 7, 12, 13]
+        ]
+        return sensor_mapping[row][col]
 
     #Function to be called during movement phase, uses checkers rules of double tapping sensor, then movement. Re-call if invalid after prompting user through gui
     def move_piece(self, player_id, mcu_id, from_sensor_id, to_sensor_id):
@@ -119,6 +158,42 @@ class Board:
                 new_troops = max(0, troops - 2)
                 self.grids[mcu_id][row][col] = f"{piece_player_id}_{piece_type}_{new_troops}"
                 print(f"Enemy's {piece} has been attacked by Archer Tower. New unit strength: {new_troops}")
+    
+    def swap_between_boards(self, player_id, from_mcu_id, from_sensor_id, to_mcu_id, to_sensor_id):
+        print("Swap between boards started.")
+        from_row = (from_sensor_id - 1) // 5
+        from_col = (from_sensor_id - 1) % 5
+        to_row = (to_sensor_id - 1) // 5
+        to_col = (to_sensor_id - 1) % 5
+
+        piece = self.grids[from_mcu_id][from_row][from_col]
+
+        if piece == '':
+            print("Your piece isn't at the start.")
+            return False
+
+        piece_player_id = int(piece.split('_')[0])
+
+        if piece_player_id != player_id:
+            print("You cannot move a piece that does not belong to you.")
+            return False
+
+        if self.grids[to_mcu_id][to_row][to_col] != '':
+            print("The destination position is already occupied.")
+            return False
+
+        if not self.is_base_space(player_id, from_mcu_id, from_col):
+            print("Invalid move. You can only start from your base space.")
+            return False
+
+        if not self.is_base_space(player_id, to_mcu_id, to_col):
+            print("Invalid move. You can only move to your base space on the other board.")
+            return False
+
+        self.grids[from_mcu_id][from_row][from_col] = ''
+        self.grids[to_mcu_id][to_row][to_col] = piece
+        print(f"Moved {piece} from MCU {from_mcu_id} sensor {from_sensor_id} to MCU {to_mcu_id} sensor {to_sensor_id}.")
+        return True
     
     #Helper function to grab movement ranges
     @staticmethod

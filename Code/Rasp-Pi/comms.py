@@ -11,7 +11,7 @@ def parse_incoming_uart_message(message):
 
     raw_message = message.strip()
 
-    message = raw_message.decode('utf-8')
+    message = raw_message.decode('uint8_t')
     
     parts = message.split()
     
@@ -28,8 +28,19 @@ def parse_incoming_uart_message(message):
     
     return board_id, mapped_sensor_id
 
+
+
+def build_outgoing_uart_message(mcu_id, command, field1, field2):
+
+    message = f"{mcu_id} {command} {field1} {field2}"
+    encoded_message = message.encode('uint8_t')
+
+    return encoded_message
+
 # Test usage
-test_messages = ["B1 S3 ", "B4 S14"]
-for msg in test_messages:
-    board_id, mapped_sensor_id = parse_incoming_uart_message(msg)
-    print(f"Parsed message '{msg.strip()}' -> Board ID: {board_id}, Mapped Sensor ID: {mapped_sensor_id}")
+#test_messages = ["B1 S3 ", "B4 S14"]
+#for msg in test_messages:
+    #board_id, mapped_sensor_id = parse_incoming_uart_message(msg)
+    #print(f"Parsed message '{msg.strip()}' -> Board ID: {board_id}, Mapped Sensor ID: {mapped_sensor_id}")
+
+
