@@ -48,10 +48,14 @@ def apply_building_effects(player_id):
             mage_tower_effect(board, player_id)
 
 def prompt_place_piece(player_id, piece_type):
-    layout = [[sg.Text(f"Place your {piece_type}")]]
+    layout = [[sg.Text(f"Place your {piece_type}")],
+              [sg.Button("OK")]]
     window = sg.Window("Place Piece", layout, finalize=True)
-    board_id, sensor_id = listener_decider(player_id)
-    board.place_piece(player_id, piece_type, board_id, sensor_id, 1)
+
+    placed = False
+    while not placed:
+        board_id, sensor_id = listener_decider(player_id)
+        placed = board.place_piece(player_id, piece_type, board_id, sensor_id, 1)
     window.close()
 
 # GUI layout definitions
@@ -111,6 +115,7 @@ def game_loop():
     while True:
         # Start Turn Screen
         uart_scream()
+        apply_building_effects(player_id)
         layout = start_turn_layout(player_id)
         window = sg.Window(f"Player {player_id}'s Turn", layout)
         event, _ = window.read()
@@ -193,23 +198,28 @@ def game_loop():
             if event == sg.WIN_CLOSED:
                 break
 
+
         elif event == "Attack":
             # Attack Sequence Screen
             layout = attack_layout()
             window = sg.Window("Attack", layout)
-            while True:
-                event, _ = window.read()
+            event, _ = window.read()
+            move_made = False
+            while not move_made:
                 if event == "Move":
                     from_board_id, from_sensor_id = listener_decider(player_id)
                     to_board_id, to_sensor_id = listener_decider(player_id)
                     if from_board_id == to_board_id:
-                        board.move_piece(player_id, from_board_id, from_sensor_id, to_sensor_id)
+                        move_made = board.move_piece(player_id, from_board_id, from_sensor_id, to_sensor_id)
                     else:
-                        board.swap_between_boards(player_id, from_board_id, from_sensor_id, to_board_id, to_sensor_id)
-                elif event == "End Attack":
+                        move_made = board.swap_between_boards(player_id, from_board_id, from_sensor_id, to_board_id, to_sensor_id)
+                    if not move_made:
+                        sg.popup("Invalid move. Try again.")
+                    else:
+                        sg.popup("Move successful.")
+                elif event == sg.WIN_CLOSED:
                     break
-                if event == sg.WIN_CLOSED:
-                    break
+                event, _ = window.read()
             window.close()
             if event == sg.WIN_CLOSED:
                 break
