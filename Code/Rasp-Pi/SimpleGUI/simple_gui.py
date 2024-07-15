@@ -18,6 +18,7 @@ players = {
     4: {'hp': 20, 'gold': 0, 'rubies': 0, 'sapphires': 0, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0}
 }
 
+
 # Define building costs
 BUILDING_COSTS = {
     'Archer Range': {'gold': 3, 'rubies': 0, 'sapphires': 0},
@@ -30,6 +31,14 @@ BUILDING_COSTS = {
 }
 
 player_id = 1
+
+def can_afford_card(card_type, player_resources):
+    if card_type == "Attack Card":
+        cost = 3 if 'Mage Tower' in player_resources['buildings'] else 5
+        return player_resources['rubies'] >= cost
+    elif card_type == "Growth Card":
+        cost = 3 if 'Mage Tower' in player_resources['buildings'] else 5
+        return player_resources['sapphires'] >= cost
 
 # Helper functions to apply building effects
 def apply_building_effects(player_id):
@@ -90,11 +99,17 @@ def building_purchase_layout(player_id):
     return layout
 
 def card_purchase_layout(player_id):
-    layout = [[sg.Text("Purchase a card or continue")]]
-    if 'Mage Tower' in players[player_id]['buildings']:
-        layout.append([sg.Button("Attack Card (3 Rubies)"), sg.Button("Growth Card (3 Sapphires)")])
+    player_resources = players[player_id]
+    affordable_cards = []
+    if can_afford_card("Attack Card", player_resources):
+        affordable_cards.append("Attack Card (3 Rubies)" if 'Mage Tower' in player_resources['buildings'] else "Attack Card (5 Rubies)")
+    if can_afford_card("Growth Card", player_resources):
+        affordable_cards.append("Growth Card (3 Sapphires)" if 'Mage Tower' in player_resources['buildings'] else "Growth Card (5 Sapphires)")
+    
+    if affordable_cards:
+        layout = [[sg.Text("Purchase a card or continue")]] + [[sg.Button(card)] for card in affordable_cards]
     else:
-        layout.append([sg.Button("Attack Card (5 Rubies)"), sg.Button("Growth Card (5 Sapphires)")])
+        layout = [[sg.Text("Not enough resources for card purchase")]]
     layout.append([sg.Button("Skip")])
     return layout
 
@@ -206,6 +221,7 @@ def game_loop():
             window = sg.Window("Attack", layout)
             event, _ = window.read()
             move_made = False
+            
             while not move_made:
                 if event == "Move":
                     from_board_id, from_sensor_id = listener_decider(player_id)
