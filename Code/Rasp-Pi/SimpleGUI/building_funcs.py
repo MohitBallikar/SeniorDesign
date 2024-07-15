@@ -1,6 +1,7 @@
 # buildings.py
 
 from movement import Board
+from simple_gui import players
 
 # Define building costs
 BUILDING_COSTS = {
@@ -24,6 +25,10 @@ def can_purchase_building(building_type, player_gold, player_rubies, player_sapp
             player_sapphires >= cost['sapphires'])
 
 # Building effects
+
+def archer_tower_effect(board, player_id):
+
+    board.tower_defense(player_id)
 
 def archer_range_effect(board, player_id):
 
@@ -77,7 +82,7 @@ def mage_tower_effect(board, player_id):
     # the rest of your game logic, such as where and how wizards can be spawned.
     print(f"Player {player_id} can now spawn a wizard.")
 
-def mine_effect(player_resources):
-    player_resources['gold'] += 1
-    player_resources['sapphires'] += 1
-    player_resources['rubies'] += 1
+def mine_effect(player_id):
+    players[player_id]['gold'] += 1
+    players[player_id]['sapphires'] += 1
+    players[player_id]['rubies'] += 1

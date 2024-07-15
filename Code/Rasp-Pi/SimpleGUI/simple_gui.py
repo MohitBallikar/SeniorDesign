@@ -4,7 +4,8 @@ import PySimpleGUI as sg
 from movement import Board
 from building_funcs import (
     can_purchase_building, archer_range_effect, barracks_effect,
-    armory_effect, stables_effect, mine_effect, mage_tower_effect
+    armory_effect, stables_effect, mine_effect, mage_tower_effect,
+    archer_tower_effect
 )
 from combat import attack_sequence, calculate_attack_range, siege
 from comms import listener_decider, uart_scream
@@ -12,10 +13,10 @@ from comms import listener_decider, uart_scream
 # Initialize the board and players
 board = Board()
 players = {
-    1: {'hp': 20, 'gold': 1, 'rubies': 1, 'sapphires': 1, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0},
-    2: {'hp': 20, 'gold': 1, 'rubies': 1, 'sapphires': 1, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0},
-    3: {'hp': 20, 'gold': 1, 'rubies': 1, 'sapphires': 1, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0},
-    4: {'hp': 20, 'gold': 1, 'rubies': 1, 'sapphires': 1, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0}
+    1: {'hp': 20, 'gold': 0, 'rubies': 0, 'sapphires': 0, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0},
+    2: {'hp': 20, 'gold': 0, 'rubies': 0, 'sapphires': 0, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0},
+    3: {'hp': 20, 'gold': 0, 'rubies': 0, 'sapphires': 0, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0},
+    4: {'hp': 20, 'gold': 0, 'rubies': 0, 'sapphires': 0, 'buildings': [], 'attack_cards': 0, 'growth_cards': 0}
 }
 
 # Define building costs
@@ -36,6 +37,8 @@ def apply_building_effects(player_id):
     for building in players[player_id]['buildings']:
         if building == 'Archer Range':
             archer_range_effect(board, player_id)
+        elif building == 'Archer Tower':
+            archer_tower_effect(board, player_id)
         elif building == 'Barracks':
             barracks_effect(board, player_id)
         elif building == 'Armory':
@@ -166,6 +169,7 @@ def game_loop():
                     players[player_id]['gold'] -= cost['gold']
                     players[player_id]['rubies'] -= cost['rubies']
                     players[player_id]['sapphires'] -= cost['sapphires']
+                    players[player_id]['hp'] += 5
                     if event == 'Archer Range':
                         prompt_place_piece(player_id, 'Archer')
                     elif event == 'Barracks':
