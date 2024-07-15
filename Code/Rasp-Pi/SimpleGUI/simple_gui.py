@@ -47,6 +47,13 @@ def apply_building_effects(player_id):
         elif building == 'Mage Tower':
             mage_tower_effect(board, player_id)
 
+def prompt_place_piece(player_id, piece_type):
+    layout = [[sg.Text(f"Place your {piece_type}")]]
+    window = sg.Window("Place Piece", layout, finalize=True)
+    board_id, sensor_id = listener_decider(player_id)
+    board.place_piece(player_id, piece_type, board_id, sensor_id, 1)
+    window.close()
+
 # GUI layout definitions
 def start_turn_layout(player_id):
     return [[sg.Text(f"Player {player_id}, Begin Turn")],
@@ -154,11 +161,14 @@ def game_loop():
                     players[player_id]['gold'] -= cost['gold']
                     players[player_id]['rubies'] -= cost['rubies']
                     players[player_id]['sapphires'] -= cost['sapphires']
-                    if event in ['Archer Range', 'Barracks', 'Mage Tower', 'Stables']:
-                        # Prompt to place the piece
-                        piece_type = event.split()[0]
-                        board_id, sensor_id = listener_decider(player_id)
-                        board.place_piece(player_id, piece_type, board_id, sensor_id, 1)
+                    if event == 'Archer Range':
+                        prompt_place_piece(player_id, 'Archer')
+                    elif event == 'Barracks':
+                        prompt_place_piece(player_id, 'Infantry')
+                    elif event == 'Mage Tower':
+                        prompt_place_piece(player_id, 'Wizard')
+                    elif event == 'Stables':
+                        prompt_place_piece(player_id, 'Cavalry')
             window.close()
             if event == sg.WIN_CLOSED:
                 break
