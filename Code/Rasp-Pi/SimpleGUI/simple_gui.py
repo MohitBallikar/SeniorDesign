@@ -192,7 +192,10 @@ def game_loop():
                 if event == "Move":
                     from_board_id, from_sensor_id = listener_decider(player_id)
                     to_board_id, to_sensor_id = listener_decider(player_id)
-                    board.move_piece(player_id, from_board_id, from_sensor_id, to_sensor_id)
+                    if from_board_id == to_board_id:
+                        board.move_piece(player_id, from_board_id, from_sensor_id, to_sensor_id)
+                    else:
+                        board.swap_between_boards(player_id, from_board_id, from_sensor_id, to_board_id, to_sensor_id)
                 elif event == "End Attack":
                     break
                 if event == sg.WIN_CLOSED:
