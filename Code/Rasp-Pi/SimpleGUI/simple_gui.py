@@ -4,8 +4,7 @@ import PySimpleGUI as sg
 from movement import Board
 from building_funcs import (
     can_purchase_building, archer_range_effect, barracks_effect,
-    armory_effect, stables_effect, mine_effect, mage_tower_effect,
-    archer_tower_effect
+    armory_effect, stables_effect, mage_tower_effect, archer_tower_effect
 )
 from combat import attack_sequence, calculate_attack_range, siege
 from comms import listener_decider, uart_scream
@@ -45,8 +44,6 @@ def apply_building_effects(player_id):
             armory_effect(board, player_id)
         elif building == 'Stables':
             stables_effect(board, player_id)
-        elif building == 'Mine':
-            mine_effect(players[player_id])
         elif building == 'Mage Tower':
             mage_tower_effect(board, player_id)
 

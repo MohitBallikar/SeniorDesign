@@ -1,7 +1,6 @@
 # buildings.py
 
 from movement import Board
-from simple_gui import players
 
 # Define building costs
 BUILDING_COSTS = {
@@ -81,8 +80,3 @@ def mage_tower_effect(board, player_id):
     # This is a placeholder function. The actual implementation would depend on
     # the rest of your game logic, such as where and how wizards can be spawned.
     print(f"Player {player_id} can now spawn a wizard.")
-
-def mine_effect(player_id):
-    players[player_id]['gold'] += 1
-    players[player_id]['sapphires'] += 1
-    players[player_id]['rubies'] += 1
