@@ -1,6 +1,6 @@
 # SeniorDesign
 
-Click the image to watch the video. (Right-click and select "Open link in new tab" for a better experience.)
+Click a thumbnail to watch the respective video. (Right-click and select "Open link in new tab" for a smoother experience.)
 
 Senior Design 2: Midterm Demo:
 
