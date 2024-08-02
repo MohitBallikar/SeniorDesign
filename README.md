@@ -16,7 +16,7 @@
 
 Senior Design 2: Midterm Demo:
 
-[![Senior Design 2: Midterm Demo](https://img.youtube.com/vi/7SakNbrVRo0/0.jpg)](https://www.youtube.com/watch?v=7SakNbrVRo0)
+[![Senior Design 2: Midterm Demo](https://img.youtube.com/vi/7SakNbrVRo0/0.jpg)](https://www.youtube.com/watch?v=7SakNbrVRo0){:target="_blank"}
 
 Senior Design 2: Final Recorded Demo:
 
