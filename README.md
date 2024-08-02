@@ -1,5 +1,7 @@
 # SeniorDesign
 
+Click the image to watch the video. (Right-click and select "Open link in new tab" for a better experience.)
+
 Senior Design 2: Midterm Demo:
 
 [![Senior Design 2: Midterm Demo](https://img.youtube.com/vi/7SakNbrVRo0/0.jpg)](https://www.youtube.com/watch?v=7SakNbrVRo0)
